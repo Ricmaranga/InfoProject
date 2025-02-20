@@ -1,0 +1,123 @@
+<MenuScreen>:
+    name: 'menu'
+    canvas.before:
+        Rectangle:
+            pos: self.pos
+            size: self.size
+            source: 'backgrounds/menu.png'
+    Label:
+        text: "Cannons" #root.title_cannons
+        font_name: 'fonts/cubic.ttf'
+        font_size: root.height / 7
+        pos_hint: {'center_x': 0.5, 'center_y': 0.8}
+        size: self.texture_size
+        color: 255/255, 205/255, 0/255, 1
+    MDButton:
+        id: play
+        theme_background_color: 'Custom'
+        background_color: 0/255, 0/255, 0/255, 0
+        style: 'text'
+        pos_hint: {'center_x': .5, 'center_y': .5}
+        theme_width: 'Custom'
+        theme_height: 'Custom'
+        size_hint: .2, .1
+        on_press:
+            root.manager.current = 'game'
+            root.manager.transition.direction = 'left'
+        MDButtonText:
+            text: 'Play'
+            theme_font_name: 'Custom'
+            font_name: 'fonts/cubic.ttf'
+            theme_text_color: 'Custom'
+            text_color: 0, 0, 1, 1
+            text_size: play.size
+            theme_font_size: 'Custom'
+            font_size: play.height
+            pos_hint: {"center_x": .5, "center_y": .5}
+    MDButton:
+        id: settings
+        name: 'settings'
+        theme_background_color: 'Custom'
+        background_color: 0/255, 0/255, 0/255, 0
+        style: 'text'
+        pos_hint: {'center_x': .5, 'center_y': .335}
+        theme_width: 'Custom'
+        theme_height: 'Custom'
+        size_hint: .2, .1
+        on_press:
+            root.manager.current = 'settings'
+            root.manager.transition.direction = 'up'
+        MDButtonText:
+            text: 'Settings'
+            theme_font_name: 'Custom'
+            font_name: 'fonts/cubic.ttf'
+            theme_text_color: 'Custom'
+            text_color: 0, 0, 1, 1
+            text_size: settings.size
+            theme_font_size: 'Custom'
+            font_size: settings.height / 2
+            pos_hint: {"center_x": .5, "center_y": .5}
+    MDButton:
+        id: quitApp
+        theme_background_color: 'Custom'
+        background_color: 0/255, 0/255, 0/255, 0
+        style: 'text'
+        pos_hint: {'center_x': .5, 'center_y': .2}
+        theme_width: 'Custom'
+        theme_height: 'Custom'
+        size_hint: .1, .08
+        on_press: app.stop()
+        MDButtonText:
+            text: 'Quit'
+            theme_font_name: 'Custom'
+            font_name: 'fonts/cubic.ttf'
+            theme_text_color: 'Custom'
+            text_color: 0, 0, 1, 1
+            text_size: quitApp.size
+            theme_font_size: 'Custom'
+            font_size: quitApp.height / 2
+            pos_hint: {"center_x": .5, "center_y": .5}
+    Image:
+        id: cursor
+        source: 'cursors/menu.png'
+        size_hint: .075, .075
+    Image:
+        id: cannon
+        size_hint: .12, .12
+        pos: 0, 0
+        source: 'cannons/right-1.png'
+    MDLabel:
+        id: copyright
+        text: 'Riccardo Marangoni\nand Lorenzo Spolti\n®©™ 2024'
+        text_color: 0/255, 0/255, 0/255, .4
+        font_size: 9
+        role: 'small'
+        halign: 'right'
+        adaptive_height: True
+        allow_no_selection: False
+        adaptive_size: True
+        pos_hint: {'right': 1, 'y': 0}
+        anchor: 'top_right'
+    MDBoxLayout:
+        id: coinBox
+        size_hint: .175, .075
+        halign: 'right'
+        pos_hint: {'right': .99, 'top': .99}
+        Image:
+            id: coinImage
+            size_hint: .5, 1
+            adaptive_size: True
+            source: 'coins/coins.gif'
+        MDLabel:
+            id: coinValue
+            halign: 'left'
+            padding: dp(0), dp(8.5), dp(0), dp(0)
+            theme_font_name: 'Custom'
+            font_name: 'fonts/cubic.ttf'
+            text_size: self.size # set text_size to allow vertical alignment
+            valign: 'middle'
+            theme_text_color: 'Custom'
+            text_color:  26/255, 101/255, 42/255, 1
+            theme_font_size: 'Custom'
+            font_size: self.height * .6
+            multiline: False

@@ -1,0 +1,40 @@
+#: kivy 2.1.0
+
+#: import MenuScreen main.MenuScreen
+#: import GameScreen main.GameScreen
+
+#: include kivyFiles/menu.kv
+#: include kivyFiles/game.kv
+
+
+Manager:
+    MenuScreen:
+        name: 'menu'
+    GameScreen:
+        name: 'game'
+    SettingScreen:
+        name: 'settings'
+    LevelScreen:
+        name: 'level'
+
+
+<SettingScreen>:
+    ScrollView:
+        MDList:
+    MDButton:
+        text: 'Back to Menu'
+        size_hint: 0.2, 0.2
+        pos_hint: {'x': 0, 'y': 0}
+        on_press:
+            root.manager.current = 'menu'
+            root.manager.transition.direction = 'right'
+
+<LevelScreen>:
+    ScrollView:
+        do_scroll_x: True
+        do_scroll_y: False
+        Scatter:
+            id: cannon
+            size_hint: .2, .2
+            AsyncImage:
+                source: 'cannons/right-1.png'

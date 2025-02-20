@@ -1,0 +1,130 @@
+<RadioButtonsForWeapon@ToggleButton>:
+    group: 'weapons'
+    size_hint: self.parent.height / self.parent.width, 1
+    border: 0, 0, 0, 0
+    background_normal: 'transparent.png'
+    on_press: self.parent.parent.activeRadioButton(self._num)
+
+
+
+<GameScreen>:
+    name: 'game'
+    on_enter:
+        self.ids.buttonWeapon1.state = 'down'
+        self.activeRadioButton(1)
+    canvas.before:
+        Rectangle:
+            pos: self.pos
+            size: self.size
+            source: 'backgrounds/levelsMenu.png'
+    Label:
+        text: 'Game Screen'
+    MDButton:
+        id: backToMenu
+        name: 'backToMenu'
+        style: 'text'
+        pos_hint: {'x': 0, 'center_y': .5}
+        theme_width: 'Custom'
+        theme_height: 'Custom'
+        size_hint: .2, .1
+        on_press:
+            root.manager.current = 'menu'
+            root.manager.transition.direction = 'right'
+        MDButtonText:
+            text: 'Back to menu'
+            theme_font_name: 'Custom'
+            font_name: 'fonts/cartoon.ttf'
+            theme_text_color: 'Custom'
+            text_color: 54/255, 219/255, 13/255, 1
+            theme_font_size: 'Custom'
+            font_size: backToMenu.height / 2
+            pos_hint: {"center_x": .5, "center_y": .5}
+    MDButton:
+        size_hint: 0.25, 0.2
+        on_press: root.manager.current = 'levelScreen'
+        MDButtonText:
+            text: 'Quit Game'
+    Image:
+        id: cannon
+        size_hint: .07, .07
+        pos: 0, 0
+        source: 'cannons/right-1.png'
+    BoxLayout:
+        size_hint: .3, .2
+        pos_hint: {"right": 1, "bottom": 0}
+        Slider:
+            id: angle
+            min: 0
+            max: 90
+            value: 45
+            orientation: 'horizontal'
+            pos_hint: {'center_x': 0.5, 'center_y': 0.5}
+    BoxLayout:
+        size_hint: .2, .5
+        pos_hint: {"right": 1, "center_y": 0.5}
+        Slider:
+            id: power
+            min: 0
+            max: 100
+            value: 50
+            orientation: 'vertical'
+            pos_hint: {'center_x': 0.5, 'center_y': 0.5}
+    BoxLayout:
+        id: weaponsBar
+        size_hint: .3, .1
+        pos_hint: {"center_x": .5, 'top': 1}
+        RadioButtonsForWeapon:
+            id: buttonWeapon1
+            _num: 1
+            pos_hint: {"x": 0, 'center_y': .5}
+            Image:
+                allow_stretch: True
+                keep_ratio: False
+                source: 'weapons/grenade.png'
+                pos: self.parent.pos
+                size: self.parent.size
+        RadioButtonsForWeapon:
+            id: buttonWeapon2
+            _num: 2
+            pos_hint: {"center_x": .5, 'center_y': .5}
+            on_state: root.laserImage()
+            Image:
+                allow_stretch: True
+                keep_ratio: False
+                source: root.laserImageVar
+                pos: self.parent.pos
+                size: self.parent.size
+        RadioButtonsForWeapon:
+            id: buttonWeapon3
+            _num: 3
+            pos_hint: {"right": 1, 'center_y': .5}
+            Image:
+                allow_stretch: True
+                keep_ratio: False
+                source: 'weapons/fakeBullet.gif'
+                pos: self.parent.pos
+                size: self.parent.size
+    MDBoxLayout:
+        id: coinBox
+        size_hint: .175, .075
+        halign: 'right'
+        pos_hint: {'right': .99, 'top': .99}
+        Image:
+            id: coinImage
+            size_hint: .5, 1
+            adaptive_size: True
+            source: 'coins/coins.gif'
+        MDLabel:
+            id: coinValue
+            halign: 'left'
+            padding: dp(0), dp(8.5), dp(0), dp(0)
+            theme_font_name: 'Custom'
+            font_name: 'fonts/cubic.ttf'
+            text_size: self.size # set text_size to allow vertical alignment
+            valign: 'middle'
+            theme_text_color: 'Custom'
+            text_color:  255/255, 255/255, 255/255, 1
+            theme_font_size: 'Custom'
+            font_size: self.height * .6
+            bold: True
+            multiline: False
