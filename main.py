@@ -23,39 +23,16 @@ from quadtree import Quadtree
 
 
 db = JsonStore('main.json')
-FPS = 60
+FPS = 120
 gravity = 9.81
 
 def color_creator():
     return random.random(), random.random(), random.random()
 
+class Movements:
 
-class MenuScreen(Screen):
-
-    def __init__(self, **kwargs):
-        super(MenuScreen, self).__init__(**kwargs)
-        Clock.schedule_interval(self.cursorPosition, 1 / FPS)
-        Clock.schedule_interval(self.update, 1 / FPS)
-        Window.bind(on_key_down = self.onKeyboard)
-        Window.bind(on_key_up=self.onKeyboardUp)
+    def __init__(self):
         self.movement_buffer = {'left': False, 'right': False}
-
-    def on_kv_post(self, base_widget):
-        self.update_coin_display()
-
-    def update_coin_display(self):
-        app = MDApp.get_running_app()
-        self.ids.coinValue.text = str(app.coins)
-
-    def on_enter(self, *args):
-        Window.show_cursor = False
-
-    def on_leave(self, *args):
-        Window.show_cursor = True
-
-    def cursorPosition(self, dt):
-        self.ids.cursor.pos = Window.mouse_pos[0] - self.ids.cursor.width/2, \
-                              Window.mouse_pos[1] - self.ids.cursor.height/2
 
     def onKeyboard(self, *args):
         if args[1] in [100, 275]:
@@ -75,7 +52,34 @@ class MenuScreen(Screen):
         if self.movement_buffer['left']:
             self.ids.cannon.pos[0] -= dp(2)
 
-class GameScreen(Screen):
+
+class MenuScreen(Screen, Movements):
+
+    def __init__(self, **kwargs):
+        super(MenuScreen, self).__init__(**kwargs)
+        Clock.schedule_interval(self.cursorPosition, 1 / FPS)
+        Clock.schedule_interval(self.update, 1 / FPS)
+        Window.bind(on_key_down = self.onKeyboard)
+        Window.bind(on_key_up = self.onKeyboardUp)
+
+    def on_kv_post(self, base_widget):
+        self.update_coin_display()
+
+    def update_coin_display(self):
+        app = MDApp.get_running_app()
+        self.ids.coinValue.text = str(app.coins)
+
+    def on_enter(self, *args):
+        Window.show_cursor = False
+
+    def on_leave(self, *args):
+        Window.show_cursor = True
+
+    def cursorPosition(self, dt):
+        self.ids.cursor.pos = Window.mouse_pos[0] - self.ids.cursor.width/2, \
+                              Window.mouse_pos[1] - self.ids.cursor.height/2
+
+class GameScreen(Screen, Movements):
 
     laserImageVar = StringProperty('lasers/laser_red_off.png')
     ammosShot = {}
@@ -83,7 +87,8 @@ class GameScreen(Screen):
 
     def __init__(self, **kwargs):
         super(GameScreen, self).__init__(**kwargs)
-        Window.bind(on_key_down = self.onKeyboard)
+        Window.bind(on_key_down= self.onKeyboard)
+        Window.bind(on_key_up= self.onKeyboardUp)
         self.quadtree = Quadtree(0, 0, Window.width, Window.height)
         self.activeAmmo = None
         self.bulletCounter = 0
@@ -112,11 +117,7 @@ class GameScreen(Screen):
         self.remove_widget(obstacle)
 
     def onKeyboard(self, *args):
-        if args[1] == 100 or args[1] == 275: # 'd' or right arrow
-            self.ids.cannon.pos[0] += dp(2)
-        elif args[1] == 97 or args[1] == 276: # 's' or left arrow
-            self.ids.cannon.pos[0] -= dp(2)
-        elif args[1] == 103: # 'g'
+        if args[1] == 103: # 'g'
             obstacle = wAS.Obstacle(self.obstacleCounter,
                                 ((Window.size[0] + Window.size[1]) / 2 / 20, (Window.size[0] + Window.size[1]) / 2 / 20))
             self.add_widget(obstacle)
@@ -170,16 +171,15 @@ class GameScreen(Screen):
             # Off-screen check
             if (projectile.x < 0 or projectile.x > Window.size[0] or
                     projectile.y < 0 or projectile.y > Window.size[1]):
-                self.remove_projectile(projectile)
+                projectile.remove(projectile)
                 continue
 
             # Retrieve possible collisions from quadtree
             possible_collisions = self.quadtree.retrieve(projectile)
             for obj in possible_collisions:
-                if isinstance(obj, wAS.Obstacle) and projectile.collisionChecker(obj):
+                if isinstance(obj, wAS.Obstacle) and projectile.collisionChecker(projectile, self.quadtree):
                     self.handle_collision(projectile, obj)
                     break  # Exit after handling a collision
-
 
 class SettingScreen(Screen):
     pass
