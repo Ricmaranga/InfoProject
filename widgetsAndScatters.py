@@ -1,3 +1,4 @@
+from kivy.clock import Clock
 from main import *
 
 class GameObject(Widget):
@@ -7,29 +8,49 @@ class GameObject(Widget):
         self.pos = (x, y)
         self.size = size
 
+    def collides_with(self, other):
+        return (self.x < other.x + other.width and
+                self.x + self.width > other.x and
+                self.y < other.y + other.height and
+                self.y + self.height > other.y)
+
 class Obstacle(GameObject):
-    def __init__(self, id, size, **kwargs):
-        self.id = id
-        width, height = self.size[0], self.size[1]
+    def __init__(self, id, size, obstacle_type, **kwargs):
         super().__init__(random.randint(int(Window.width * 1/8), int(Window.width * 4/5)),
                          random.randint(int(Window.width * 1/8), int(Window.width * 4/5)),
-                         width, height, size)
+                         size[0], size[1], size)
+        self.id = id
+        self.obstacle_type = obstacle_type
+        self.state = "active"
+        self.marked_for_removal = False
         with self.canvas:
-            Color(rgb = color_creator())
-            self.shape = Rectangle(pos = self.pos, size = self.size)
+            Color(rgb=color_creator())
+            self.shape = Rectangle(pos=self.pos, size=self.size)
 
+    def handle_collision(self, projectile):
+        if self.state == "active":
+            if self.obstacle_type == "Rock":
+                self.destroy()
+            elif self.obstacle_type == "Bulletproof Mirror":
+                self.reflect(projectile)
+
+    def destroy(self):
+        self.state = "destroyed"
+        self.marked_for_removal = True
+        Clock.schedule_once(self._remove_widget)
+
+    def _remove_widget(self, dt):
+        if self.parent and self.marked_for_removal:
+            self.parent.remove_widget(self)
 
 class Ammo(GameObject):
     def __init__(self, ammoType, id, initPos, size, angle, power, weight, imgSource, gameScreen, *args, **kwargs):
-
-        super().__init__(initPos[0], initPos[1], self.width, self.height, size)
-
-        self.image = Image(source = imgSource, size = self.size)
+        super().__init__(initPos[0], initPos[1], size[0], size[1], size)
+        self.image = Image(source=imgSource, size=self.size)
         self.add_widget(self.image)
-        self.do_scale = False  # Disable scaling transformations
-        self.do_translation = True  # Allow translation (moving)
-        self.do_rotation = True  # Allow rotation
-
+        self.do_scale = False
+        self.do_translation = True
+        self.do_rotation = True
         self.ammoType = ammoType
         self.id = id
         self.angle = angle
@@ -41,64 +62,43 @@ class Ammo(GameObject):
         self.init_vY = self.velocity * math.sin(math.radians(self.angle))
         self.speedCallBack = Clock.schedule_interval(self.speed, 1 / FPS)
         self.vX, self.vY = self.init_vX, self.init_vY
-
         self.gameScreen = gameScreen
 
-        print(self.init_vX, self.init_vY)
-
     def on_resize(self, *args):
-        # Force the size to stay consistent
         self.size = self.size
         self.image.size = self.size
 
     def on_pos(self, *args):
         if hasattr(self, 'image'):
-            # Ensure that changing position doesn't affect size
             self.size = self.size
             self.image.size = self.size
 
     def remove(self):
-        # Stop the scheduled callbacks
         Clock.unschedule(self.speedCallBack)
         if self.id in self.gameScreen.ammosShot:
-            Clock.unschedule(self.gameScreen.ammosShot[self.id])
             del self.gameScreen.ammosShot[self.id]
-        # Remove the ammo from the parent widget
         if self.parent:
             self.parent.remove_widget(self)
 
     def speed(self, dt):
-        self.vX = self.init_vX * dt
-        self.vY = self.init_vY - gravity * dt
         newX = self.vX * dt + self.x
         newY = self.y + 0.5 * (self.init_vY + self.vY) * dt
-        print(self.vX, self.vY, newX, newY)
         self.pos = (newX, newY)
-        self.angle = math.radians(self.vY/self.vX)
-        self.size = self.size
+        self.angle = math.radians(self.vY / self.vX)
         self.bounds = (newX, newY, self.width, self.height)
+        self.image.pos = self.pos
 
-    def collisionChecker(self, quadtree, *args):
-        print(quadtree)
-        # Prepare the quadtree: clear it and re-insert obstacles.
-        quadtree.clear()  # Optional: clear previous frame's objects
-        for obstacle in obstacles:
-            quadtree.insert(obstacle)
+    def has_moved_significantly(self):
+        return True  # Placeholder for actual logic
 
-
+    def handle_collision(self, obstacle):
+        if self.ammoType == "bomb":
+            if obstacle.obstacle_type == "Rock":
+                print(f"Bomb {self.id} collided with Rock {obstacle.id}")  # Debugging
+                obstacle.destroy()
+                self.remove()
 
 class Bomb(Ammo):
     def __init__(self, id, initPos, size, angle, power, imgSource, gameScreen, *args):
         super().__init__('bomb', id, initPos, size, angle, power, 40, imgSource, gameScreen)
-        GameScreen.ammosShot[self.id] = self
-
-class Laser(Ammo):
-    def __init__(self, id, initPos, size, angle, power, imgSource, gameScreen, *args):
-        super().__init__('laser', id, initPos, size, angle, power, 2, imgSource, gameScreen)
-        GameScreen.ammosShot[self.id] = self
-        self.rotation = math.tan(self.vX / self.vY)
-
-class Bullet(Ammo):
-    def __init__(self, id, initPos, size, angle, power, imgSource, gameScreen, *args):
-        super().__init__('bullet', id, initPos, size, angle, power, 25, imgSource, gameScreen)
         GameScreen.ammosShot[self.id] = self
