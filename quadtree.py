@@ -12,9 +12,7 @@ class Quadtree:
         self.objects.clear()
         self.nodes.clear()
 
-
     def split(self):
-        """Divides the current node into four subnodes"""
         x, y, w, h = self.bounds
         sub_w, sub_h = w / 2, h / 2
 
@@ -26,7 +24,6 @@ class Quadtree:
         ]
 
     def get_index(self, obj):
-        """Determines which quadrant an object belongs to"""
         x, y, w, h = self.bounds
         obj_x, obj_y, obj_w, obj_h = obj.bounds
 
@@ -46,7 +43,6 @@ class Quadtree:
         return -1  # Object overlaps multiple quadrants
 
     def insert(self, obj):
-        """Inserts an object into the quadtree"""
         if self.nodes:
             index = self.get_index(obj)
             if index != -1:
@@ -68,7 +64,6 @@ class Quadtree:
                     i += 1
 
     def retrieve(self, obj):
-        """Retrieves all possible collisions for an object"""
         potential_collisions = self.objects[:]
 
         if self.nodes:
